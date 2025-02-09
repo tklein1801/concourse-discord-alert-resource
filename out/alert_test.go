@@ -15,50 +15,49 @@ func TestNewAlert(t *testing.T) {
 		// Default and overrides.
 		"default": {
 			input: &concourse.OutRequest{},
-			want:  Alert{Type: "default", Color: "#35495c", IconURL: "https://ci.concourse-ci.org/public/images/favicon-pending.png"},
+			want:  Alert{Type: "default", Color: 0x35495c, IconURL: "https://ci.concourse-ci.org/public/images/favicon-pending.png"},
 		},
 		"custom params": {
 			input: &concourse.OutRequest{
-				Source: concourse.Source{Channel: "general"},
-				Params: concourse.OutParams{Channel: "custom-channel", Color: "#ffffff", Message: "custom-message", Text: "custom-text", Disable: true},
+				Source: concourse.Source{},
+				Params: concourse.OutParams{Color: "0xffffff", Message: "custom-message", Text: "custom-text", Disable: true},
 			},
-			want: Alert{Type: "default", Channel: "custom-channel", Color: "#ffffff", IconURL: "https://ci.concourse-ci.org/public/images/favicon-pending.png", Message: "custom-message", Text: "custom-text", Disabled: true},
+			want: Alert{Type: "default", Color: 0x35495c, IconURL: "https://ci.concourse-ci.org/public/images/favicon-pending.png", Message: "custom-message", Text: "custom-text", Disabled: true},
 		},
 		"custom source": {
 			input: &concourse.OutRequest{
-				Source: concourse.Source{Channel: "general", Disable: true},
+				Source: concourse.Source{Disable: true},
 			},
-			want: Alert{Type: "default", Channel: "general", Color: "#35495c", IconURL: "https://ci.concourse-ci.org/public/images/favicon-pending.png", Disabled: true},
+			want: Alert{Type: "default", Color: 0x35495c, IconURL: "https://ci.concourse-ci.org/public/images/favicon-pending.png", Disabled: true},
 		},
-
 		// Alert types.
 		"success": {
 			input: &concourse.OutRequest{Params: concourse.OutParams{AlertType: "success"}},
-			want:  Alert{Type: "success", Color: "#32cd32", IconURL: "https://ci.concourse-ci.org/public/images/favicon-succeeded.png", Message: "Success"},
+			want:  Alert{Type: "success", Color: 0x35495c, IconURL: "https://ci.concourse-ci.org/public/images/favicon-succeeded.png", Message: "Success"},
 		},
 		"failed": {
 			input: &concourse.OutRequest{Params: concourse.OutParams{AlertType: "failed"}},
-			want:  Alert{Type: "failed", Color: "#d00000", IconURL: "https://ci.concourse-ci.org/public/images/favicon-failed.png", Message: "Failed"},
+			want:  Alert{Type: "failed", Color: 0x35495c, IconURL: "https://ci.concourse-ci.org/public/images/favicon-failed.png", Message: "Failed"},
 		},
 		"started": {
 			input: &concourse.OutRequest{Params: concourse.OutParams{AlertType: "started"}},
-			want:  Alert{Type: "started", Color: "#f7cd42", IconURL: "https://ci.concourse-ci.org/public/images/favicon-started.png", Message: "Started"},
+			want:  Alert{Type: "started", Color: 0x35495c, IconURL: "https://ci.concourse-ci.org/public/images/favicon-started.png", Message: "Started"},
 		},
 		"aborted": {
 			input: &concourse.OutRequest{Params: concourse.OutParams{AlertType: "aborted"}},
-			want:  Alert{Type: "aborted", Color: "#8d4b32", IconURL: "https://ci.concourse-ci.org/public/images/favicon-aborted.png", Message: "Aborted"},
+			want:  Alert{Type: "aborted", Color: 0x35495c, IconURL: "https://ci.concourse-ci.org/public/images/favicon-aborted.png", Message: "Aborted"},
 		},
 		"fixed": {
 			input: &concourse.OutRequest{Params: concourse.OutParams{AlertType: "fixed"}},
-			want:  Alert{Type: "fixed", Color: "#32cd32", IconURL: "https://ci.concourse-ci.org/public/images/favicon-succeeded.png", Message: "Fixed"},
+			want:  Alert{Type: "fixed", Color: 0x35495c, IconURL: "https://ci.concourse-ci.org/public/images/favicon-succeeded.png", Message: "Fixed"},
 		},
 		"broke": {
 			input: &concourse.OutRequest{Params: concourse.OutParams{AlertType: "broke"}},
-			want:  Alert{Type: "broke", Color: "#d00000", IconURL: "https://ci.concourse-ci.org/public/images/favicon-failed.png", Message: "Broke"},
+			want:  Alert{Type: "broke", Color: 0x35495c, IconURL: "https://ci.concourse-ci.org/public/images/favicon-failed.png", Message: "Broke"},
 		},
 		"errored": {
 			input: &concourse.OutRequest{Params: concourse.OutParams{AlertType: "errored"}},
-			want:  Alert{Type: "errored", Color: "#f5a623", IconURL: "https://ci.concourse-ci.org/public/images/favicon-errored.png", Message: "Errored"},
+			want:  Alert{Type: "errored", Color: 0x35495c, IconURL: "https://ci.concourse-ci.org/public/images/favicon-errored.png", Message: "Errored"},
 		},
 	}
 

@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/tklein1801/concourse-discord-alert-resource/concourse"
-	"github.com/tklein1801/concourse-discord-alert-resource/slack"
+	"github.com/tklein1801/concourse-discord-alert-resource/discord"
 )
 
 func TestOut(t *testing.T) {
@@ -44,7 +44,6 @@ func TestOut(t *testing.T) {
 				Version: concourse.Version{"ver": "static"},
 				Metadata: []concourse.Metadata{
 					{Name: "type", Value: "default"},
-					{Name: "channel", Value: ""},
 					{Name: "alerted", Value: "true"},
 				},
 			},
@@ -59,7 +58,7 @@ func TestOut(t *testing.T) {
 				Version: concourse.Version{"ver": "static"},
 				Metadata: []concourse.Metadata{
 					{Name: "type", Value: "success"},
-					{Name: "channel", Value: ""},
+
 					{Name: "alerted", Value: "true"},
 				},
 			},
@@ -74,7 +73,7 @@ func TestOut(t *testing.T) {
 				Version: concourse.Version{"ver": "static"},
 				Metadata: []concourse.Metadata{
 					{Name: "type", Value: "failed"},
-					{Name: "channel", Value: ""},
+
 					{Name: "alerted", Value: "true"},
 				},
 			},
@@ -89,7 +88,6 @@ func TestOut(t *testing.T) {
 				Version: concourse.Version{"ver": "static"},
 				Metadata: []concourse.Metadata{
 					{Name: "type", Value: "started"},
-					{Name: "channel", Value: ""},
 					{Name: "alerted", Value: "true"},
 				},
 			},
@@ -104,7 +102,6 @@ func TestOut(t *testing.T) {
 				Version: concourse.Version{"ver": "static"},
 				Metadata: []concourse.Metadata{
 					{Name: "type", Value: "aborted"},
-					{Name: "channel", Value: ""},
 					{Name: "alerted", Value: "true"},
 				},
 			},
@@ -123,36 +120,6 @@ func TestOut(t *testing.T) {
 				Version: concourse.Version{"ver": "static"},
 				Metadata: []concourse.Metadata{
 					{Name: "type", Value: "default"},
-					{Name: "channel", Value: ""},
-					{Name: "alerted", Value: "true"},
-				},
-			},
-			env: env,
-		},
-		"override channel at Source": {
-			outRequest: &concourse.OutRequest{
-				Source: concourse.Source{URL: ok.URL, Channel: "#source"},
-			},
-			want: &concourse.OutResponse{
-				Version: concourse.Version{"ver": "static"},
-				Metadata: []concourse.Metadata{
-					{Name: "type", Value: "default"},
-					{Name: "channel", Value: "#source"},
-					{Name: "alerted", Value: "true"},
-				},
-			},
-			env: env,
-		},
-		"override channel at Params": {
-			outRequest: &concourse.OutRequest{
-				Source: concourse.Source{URL: ok.URL, Channel: "#source"},
-				Params: concourse.OutParams{Channel: "#params"},
-			},
-			want: &concourse.OutResponse{
-				Version: concourse.Version{"ver": "static"},
-				Metadata: []concourse.Metadata{
-					{Name: "type", Value: "default"},
-					{Name: "channel", Value: "#params"},
 					{Name: "alerted", Value: "true"},
 				},
 			},
@@ -167,13 +134,12 @@ func TestOut(t *testing.T) {
 				Version: concourse.Version{"ver": "static"},
 				Metadata: []concourse.Metadata{
 					{Name: "type", Value: "default"},
-					{Name: "channel", Value: ""},
 					{Name: "alerted", Value: "false"},
 				},
 			},
 			env: env,
 		},
-		"error without Slack URL": {
+		"error without Discord Webhook URL": {
 			outRequest: &concourse.OutRequest{
 				Source: concourse.Source{URL: ""},
 			},
@@ -217,50 +183,39 @@ func TestOut(t *testing.T) {
 func TestBuildMessage(t *testing.T) {
 	cases := map[string]struct {
 		alert Alert
-		want  *slack.Message
+		want  *discord.Message
 	}{
-		"empty channel": {
+		"url set": {
 			alert: Alert{
 				Type:    "default",
-				Color:   "#ffffff",
+				Color:   0xffffff,
 				IconURL: "",
 				Message: "Testing",
 			},
-			want: &slack.Message{
-				Attachments: []slack.Attachment{
+			want: &discord.Message{
+				Content:  "content ",
+				Username: "Concourse",
+				Embeds: []discord.Embed{
 					{
-						Fallback:   "Testing: demo/test/1 -- https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1",
-						Color:      "#ffffff",
-						AuthorName: "Testing",
-						Fields: []slack.Field{
-							{Title: "Job", Value: "demo/test", Short: true},
-							{Title: "Build", Value: "1", Short: true},
+						Description: "Testing",
+						URL:         "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1",
+						Color:       0xffffff,
+						Image:       &discord.Image{URL: "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1"},
+						Fields: []discord.Field{
+							{
+								Name:   "Step",
+								Value:  "demo/test",
+								Inline: true,
+							},
+							{
+								Name:   "Build",
+								Value:  "1",
+								Inline: true,
+							},
 						},
-						Footer: "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1", FooterIcon: ""},
+					},
 				},
-				Channel: ""},
-		},
-		"channel and url set": {
-			alert: Alert{
-				Type:    "default",
-				Channel: "general",
-				Color:   "#ffffff",
-				IconURL: "",
-				Message: "Testing",
 			},
-			want: &slack.Message{
-				Attachments: []slack.Attachment{
-					{
-						Fallback:   "Testing: demo/test/1 -- https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1",
-						Color:      "#ffffff",
-						AuthorName: "Testing",
-						Fields: []slack.Field{
-							{Title: "Job", Value: "demo/test", Short: true},
-							{Title: "Build", Value: "1", Short: true},
-						},
-						Footer: "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1", FooterIcon: ""},
-				},
-				Channel: "general"},
 		},
 		"message file": {
 			alert: Alert{
@@ -268,16 +223,27 @@ func TestBuildMessage(t *testing.T) {
 				Message:     "Testing",
 				MessageFile: "test_file",
 			},
-			want: &slack.Message{
-				Attachments: []slack.Attachment{
+			want: &discord.Message{
+				Content:  "content ",
+				Username: "Concourse",
+				Embeds: []discord.Embed{
 					{
-						Fallback:   "filecontents: demo/test/1 -- https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1",
-						AuthorName: "filecontents",
-						Fields: []slack.Field{
-							{Title: "Job", Value: "demo/test", Short: true},
-							{Title: "Build", Value: "1", Short: true},
+						Description: "filecontents",
+						URL:         "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1",
+						Image:       &discord.Image{URL: "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1"},
+						Fields: []discord.Field{
+							{
+								Name:   "Step",
+								Value:  "demo/test",
+								Inline: true,
+							},
+							{
+								Name:   "Build",
+								Value:  "1",
+								Inline: true,
+							},
 						},
-						Footer: "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1", FooterIcon: ""},
+					},
 				},
 			},
 		},
@@ -287,55 +253,28 @@ func TestBuildMessage(t *testing.T) {
 				Message:     "Testing",
 				MessageFile: "missing file",
 			},
-			want: &slack.Message{
-				Attachments: []slack.Attachment{
+			want: &discord.Message{
+				Content:  "content ",
+				Username: "Concourse",
+				Embeds: []discord.Embed{
 					{
-						Fallback:   "Testing: demo/test/1 -- https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1",
-						AuthorName: "Testing",
-						Fields: []slack.Field{
-							{Title: "Job", Value: "demo/test", Short: true},
-							{Title: "Build", Value: "1", Short: true},
+						Description: "Testing",
+						URL:         "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1",
+						Image:       &discord.Image{URL: "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1"},
+						Fields: []discord.Field{
+							{
+								Name:   "Step",
+								Value:  "demo/test",
+								Inline: true,
+							},
+							{
+								Name:   "Build",
+								Value:  "1",
+								Inline: true,
+							},
 						},
-						Footer: "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1", FooterIcon: ""},
+					},
 				},
-			},
-		},
-		"channel file": {
-			alert: Alert{
-				Type:        "default",
-				Channel:     "testchannel",
-				ChannelFile: "test_file",
-			},
-			want: &slack.Message{
-				Attachments: []slack.Attachment{
-					{
-						Fallback: ": demo/test/1 -- https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1",
-						Fields: []slack.Field{
-							{Title: "Job", Value: "demo/test", Short: true},
-							{Title: "Build", Value: "1", Short: true},
-						},
-						Footer: "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1", FooterIcon: ""},
-				},
-				Channel: "filecontents",
-			},
-		},
-		"channel file failure": {
-			alert: Alert{
-				Type:        "default",
-				Channel:     "testchannel",
-				ChannelFile: "missing file",
-			},
-			want: &slack.Message{
-				Attachments: []slack.Attachment{
-					{
-						Fallback: ": demo/test/1 -- https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1",
-						Fields: []slack.Field{
-							{Title: "Job", Value: "demo/test", Short: true},
-							{Title: "Build", Value: "1", Short: true},
-						},
-						Footer: "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1", FooterIcon: ""},
-				},
-				Channel: "testchannel",
 			},
 		},
 	}
@@ -352,7 +291,7 @@ func TestBuildMessage(t *testing.T) {
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
 			path := ""
-			if c.alert.MessageFile != "" || c.alert.ChannelFile != "" {
+			if c.alert.MessageFile != "" {
 				path = t.TempDir()
 
 				if err := os.WriteFile(filepath.Join(path, "test_file"), []byte("filecontents"), 0666); err != nil {
@@ -362,7 +301,7 @@ func TestBuildMessage(t *testing.T) {
 
 			got := buildMessage(c.alert, metadata, path)
 			if !cmp.Equal(got, c.want) {
-				t.Fatalf("unexpected slack.Message value from buildSlackMessage:\n\t(GOT): %#v\n\t(WNT): %#v\n\t(DIFF): %v", got, c.want, cmp.Diff(got, c.want))
+				t.Fatalf("unexpected discord.Message value from buildDiscordMessage:\n\t(GOT): %#v\n\t(WNT): %#v\n\t(DIFF): %v", got, c.want, cmp.Diff(got, c.want))
 			}
 		})
 	}
