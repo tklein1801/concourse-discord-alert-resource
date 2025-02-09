@@ -1,6 +1,6 @@
 package main
 
-import "github.com/arbourd/concourse-slack-alert-resource/concourse"
+import "github.com/tklein1801/concourse-discord-alert-resource/concourse"
 
 // An Alert defines the notification that will be sent to Slack.
 type Alert struct {

@@ -3,8 +3,8 @@ package main
 import (
 	"testing"
 
-	"github.com/arbourd/concourse-slack-alert-resource/concourse"
 	"github.com/google/go-cmp/cmp"
+	"github.com/tklein1801/concourse-discord-alert-resource/concourse"
 )
 
 func TestNewAlert(t *testing.T) {

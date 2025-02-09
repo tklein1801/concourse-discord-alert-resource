@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/arbourd/concourse-slack-alert-resource/concourse"
-	"github.com/arbourd/concourse-slack-alert-resource/slack"
+	"github.com/tklein1801/concourse-discord-alert-resource/concourse"
+	"github.com/tklein1801/concourse-discord-alert-resource/slack"
 )
 
 func buildMessage(alert Alert, m concourse.BuildMetadata, path string) *slack.Message {

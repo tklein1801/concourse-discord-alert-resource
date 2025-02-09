@@ -1,4 +1,4 @@
-module github.com/arbourd/concourse-slack-alert-resource
+module github.com/tklein1801/concourse-discord-alert-resource
 
 go 1.22
 

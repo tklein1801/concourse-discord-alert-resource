@@ -1,6 +1,9 @@
-[![Go Report Card](https://goreportcard.com/badge/github.com/arbourd/concourse-slack-alert-resource)](https://goreportcard.com/report/github.com/arbourd/concourse-slack-alert-resource)
+[![Go Report Card](https://goreportcard.com/badge/github.com/tklein1801/concourse-discord-alert-resource)](https://goreportcard.com/report/github.com/tklein1801/concourse-discord-alert-resource)
 
-# concourse-slack-alert-resource
+# concourse-discord-alert-resource
+
+> [!NOTE]  
+> This is a fork of [arbourd/concourse-slack-alert-resource](https://github.com/arbourd/concourse-slack-alert-resource) which got modified in order to send messages as notifications to Discord using webhooks
 
 A structured and opinionated Slack notification resource for [Concourse](https://concourse-ci.org/).
 
@@ -14,23 +17,22 @@ Use this resource by adding the following to the resource_types section of a pip
 
 ```yaml
 resource_types:
-
-- name: slack-alert
-  type: registry-image
-  source:
-    repository: ghcr.io/arbourd/concourse-slack-alert-resource
+  - name: discord-alert
+    type: registry-image
+    source:
+      repository: ghcr.io/tklein1801/concourse-discord-alert-resource
 ```
 
 See the [Concourse docs](https://concourse-ci.org/resource-types.html) for more details on adding `resource_types` to a pipeline config.
 
 ## Source Configuration
 
-* `url`: *Required.* Slack webhook URL.
-* `channel`: *Optional*. Target channel where messages are posted. If unset the default channel of the webhook is used.
-* `concourse_url`: *Optional.* The external URL that points to Concourse. Defaults to the env variable `ATC_EXTERNAL_URL`.
-* `username`: *Optional.* Concourse local user (or basic auth) username. Required for non-public pipelines if using alert type `fixed` or `broke`
-* `password`: *Optional.* Concourse local user (or basic auth) password. Required for non-public pipelines if using alert type `fixed` or `broke`
-* `disable`: *Optional.* Disables the resource (does not send notifications). Defaults to `false`.
+- `url`: _Required._ Slack webhook URL.
+- `channel`: _Optional_. Target channel where messages are posted. If unset the default channel of the webhook is used.
+- `concourse_url`: _Optional._ The external URL that points to Concourse. Defaults to the env variable `ATC_EXTERNAL_URL`.
+- `username`: _Optional._ Concourse local user (or basic auth) username. Required for non-public pipelines if using alert type `fixed` or `broke`
+- `password`: _Optional._ Concourse local user (or basic auth) password. Required for non-public pipelines if using alert type `fixed` or `broke`
+- `disable`: _Optional._ Disables the resource (does not send notifications). Defaults to `false`.
 
 ## Behavior
 
@@ -38,21 +40,21 @@ See the [Concourse docs](https://concourse-ci.org/resource-types.html) for more 
 
 ### `in`: No operation.
 
-### `out`: Send a message to Slack.
+### `out`: Send a message to Discord.
 
 Sends a structured message to Slack based on the alert type.
 
 #### Parameters
 
-- `alert_type`: *Optional.* The type of alert to send to Slack. See [Alert Types](#alert-types). Defaults to `default`.
-- `channel`: *Optional.* Channel where this message is posted. Defaults to the `channel` setting in Source.
-- `channel_file`: *Optional.* File containing text which overrides `channel`. If the file cannot be read, `channel` will be used instead.
-- `message`: *Optional.* The status message at the top of the alert. Defaults to name of alert type.
-- `message_file`: *Optional.* File containing text which overrides `message`. If the file cannot be read, `message` will be used instead.
-- `text`: *Optional.* Additional text below the message of the alert. Defaults to an empty string.
-- `text_file`: *Optional.* File containing text which overrides `text`. If the file cannot be read, `text` will be used instead.
-- `color`: *Optional.* The color of the notification bar as a hexadecimal. Defaults to the icon color of the alert type.
-- `disable`: *Optional.* Disables the alert. Defaults to `false`.
+- `alert_type`: _Optional._ The type of alert to send to Slack. See [Alert Types](#alert-types). Defaults to `default`.
+- `channel`: _Optional._ Channel where this message is posted. Defaults to the `channel` setting in Source.
+- `channel_file`: _Optional._ File containing text which overrides `channel`. If the file cannot be read, `channel` will be used instead.
+- `message`: _Optional._ The status message at the top of the alert. Defaults to name of alert type.
+- `message_file`: _Optional._ File containing text which overrides `message`. If the file cannot be read, `message` will be used instead.
+- `text`: _Optional._ Additional text below the message of the alert. Defaults to an empty string.
+- `text_file`: _Optional._ File containing text which overrides `text`. If the file cannot be read, `text` will be used instead.
+- `color`: _Optional._ The color of the notification bar as a hexadecimal. Defaults to the icon color of the alert type.
+- `disable`: _Optional._ Disables the alert. Defaults to `false`.
 
 #### Alert Types
 
@@ -100,73 +102,73 @@ Using the default alert type with custom message and color:
 
 ```yaml
 resources:
-- name: notify
-  type: slack-alert
-  source:
-    url: https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+  - name: notify
+    type: discord-alert
+    source:
+      url: https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
 
 jobs:
   # ...
   plan:
-  - put: notify
-    params:
-      message: Completed
-      color: "#eeeeee"
+    - put: notify
+      params:
+        message: Completed
+        color: '#eeeeee'
 ```
 
 Using built-in alert types with appropriate build hooks:
 
 ```yaml
 resources:
-- name: notify
-  type: slack-alert
-  source:
-    url: https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+  - name: notify
+    type: discord-alert
+    source:
+      url: https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
 
 jobs:
   # ...
   plan:
-  - put: notify
-    params:
-      alert_type: started
-  - put: some-other-task
-    on_success:
-      put: notify
+    - put: notify
       params:
-        alert_type: success
-    on_failure:
-      put: notify
-      params:
-        alert_type: failed
-    on_abort:
-      put: notify
-      params:
-        alert_type: aborted
-    on_error:
-      put: notify
-      params:
-        alert_type: errored
+        alert_type: started
+    - put: some-other-task
+      on_success:
+        put: notify
+        params:
+          alert_type: success
+      on_failure:
+        put: notify
+        params:
+          alert_type: failed
+      on_abort:
+        put: notify
+        params:
+          alert_type: aborted
+      on_error:
+        put: notify
+        params:
+          alert_type: errored
 ```
 
 Using the `fixed` alert type:
 
 ```yaml
 resources:
-- name: notify
-  type: slack-alert
-  source:
-    url: https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
-    # `alert_type: fixed` requires Concourse credentials if pipeline is private
-    username: concourse
-    password: concourse
+  - name: notify
+    type: discord-alert
+    source:
+      url: https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+      # `alert_type: fixed` requires Concourse credentials if pipeline is private
+      username: concourse
+      password: concourse
 
 jobs:
   # ...
   plan:
-  - put: some-other-task
-    on_success:
-      put: notify
-      params:
-        # will only alert if build was successful and fixed
-        alert_type: fixed
+    - put: some-other-task
+      on_success:
+        put: notify
+        params:
+          # will only alert if build was successful and fixed
+          alert_type: fixed
 ```

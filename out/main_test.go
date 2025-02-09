@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/arbourd/concourse-slack-alert-resource/concourse"
-	"github.com/arbourd/concourse-slack-alert-resource/slack"
 	"github.com/google/go-cmp/cmp"
+	"github.com/tklein1801/concourse-discord-alert-resource/concourse"
+	"github.com/tklein1801/concourse-discord-alert-resource/slack"
 )
 
 func TestOut(t *testing.T) {
