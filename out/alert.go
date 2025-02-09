@@ -8,14 +8,12 @@ import (
 
 // An Alert defines the notification that will be sent to Slack.
 type Alert struct {
-	Type        string
-	Color       uint
-	IconURL     string
-	Message     string
-	MessageFile string
-	Text        string
-	TextFile    string
-	Disabled    bool
+	Type     string
+	Color    uint
+	IconURL  string
+	Message  string
+	Text     string
+	Disabled bool
 }
 
 // NewAlert constructs and returns an Alert.
@@ -77,7 +75,7 @@ func NewAlert(input *concourse.OutRequest) Alert {
 			Type:    "default",
 			Color:   defaultColor, // Dark blue
 			IconURL: "https://ci.concourse-ci.org/public/images/favicon-pending.png",
-			Message: "",
+			Message: "Defaulted",
 		}
 	}
 
@@ -89,7 +87,6 @@ func NewAlert(input *concourse.OutRequest) Alert {
 	if input.Params.Message != "" {
 		alert.Message = input.Params.Message
 	}
-	alert.MessageFile = input.Params.MessageFile
 
 	if input.Params.Color != "" {
 		colorValue, err := strconv.ParseUint(input.Params.Color, 16, 32)
@@ -103,6 +100,5 @@ func NewAlert(input *concourse.OutRequest) Alert {
 	}
 
 	alert.Text = input.Params.Text
-	alert.TextFile = input.Params.TextFile
 	return alert
 }

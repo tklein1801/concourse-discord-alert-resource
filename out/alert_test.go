@@ -15,7 +15,7 @@ func TestNewAlert(t *testing.T) {
 		// Default and overrides.
 		"default": {
 			input: &concourse.OutRequest{},
-			want:  Alert{Type: "default", Color: 0x35495c, IconURL: "https://ci.concourse-ci.org/public/images/favicon-pending.png"},
+			want:  Alert{Type: "default", Color: 0x35495c, IconURL: "https://ci.concourse-ci.org/public/images/favicon-pending.png", Message: "Defaulted"},
 		},
 		"custom params": {
 			input: &concourse.OutRequest{
@@ -28,7 +28,7 @@ func TestNewAlert(t *testing.T) {
 			input: &concourse.OutRequest{
 				Source: concourse.Source{Disable: true},
 			},
-			want: Alert{Type: "default", Color: 0x35495c, IconURL: "https://ci.concourse-ci.org/public/images/favicon-pending.png", Disabled: true},
+			want: Alert{Type: "default", Color: 0x35495c, IconURL: "https://ci.concourse-ci.org/public/images/favicon-pending.png", Message: "Defaulted", Disabled: true},
 		},
 		// Alert types.
 		"success": {

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -15,41 +14,21 @@ import (
 	"github.com/tklein1801/concourse-discord-alert-resource/discord"
 )
 
-func buildMessage(alert Alert, m concourse.BuildMetadata, path string) *discord.Message {
+func buildMessage(alert Alert, m concourse.BuildMetadata) *discord.Message {
 	message := alert.Message
-	text := alert.Text
-
-	// Open and read message file if set
-	if alert.MessageFile != "" {
-		file := filepath.Join(path, alert.MessageFile)
-		f, err := os.ReadFile(file)
-
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error reading message_file: %v\nwill default to message instead\n", err)
-		} else {
-			message = strings.TrimSpace(string(f))
-		}
-	}
-
-	// Open and read text file if set
-	if alert.TextFile != "" {
-		file := filepath.Join(path, alert.TextFile)
-		f, err := os.ReadFile(file)
-
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error reading text_file: %v\nwill default to text instead\n", err)
-		} else {
-			text = strings.TrimSpace(string(f))
-		}
+	url := m.URL
+	if !strings.HasPrefix(url, "http") {
+		url = "http://missing.domain" + url // Ensure URL has http prefix
 	}
 
 	embeds := []discord.Embed{
 		{
-			Description: message,
-			URL:         m.URL,
+			Title:       message,
+			Description: fmt.Sprintf("The execution of task '%s' in pipeline '%s' ended with status '%s'.", m.JobName, m.PipelineName, alert.Type),
+			URL:         url,
 			Color:       alert.Color,
 			Image: &discord.Image{
-				URL: m.URL,
+				URL: url,
 			},
 			Fields: []discord.Field{
 				{
@@ -66,7 +45,7 @@ func buildMessage(alert Alert, m concourse.BuildMetadata, path string) *discord.
 		},
 	}
 
-	return &discord.Message{Content: fmt.Sprintf("content %s", text), Username: "Concourse", Embeds: embeds}
+	return &discord.Message{Username: "Concourse CI", Embeds: embeds}
 }
 
 func previousBuildStatus(input *concourse.OutRequest, m concourse.BuildMetadata) (string, error) {
@@ -122,9 +101,9 @@ func previousBuildName(s string) (string, error) {
 
 var maxElapsedTime = 30 * time.Second
 
-func out(input *concourse.OutRequest, path string) (*concourse.OutResponse, error) {
+func out(input *concourse.OutRequest) (*concourse.OutResponse, error) {
 	if input.Source.URL == "" {
-		return nil, errors.New("slack webhook url cannot be blank")
+		return nil, errors.New("discord webhook url cannot be blank")
 	}
 
 	alert := NewAlert(input)
@@ -144,10 +123,10 @@ func out(input *concourse.OutRequest, path string) (*concourse.OutResponse, erro
 		}
 	}
 
-	message := buildMessage(alert, metadata, path)
+	message := buildMessage(alert, metadata)
 	err := discord.Send(input.Source.URL, message, maxElapsedTime)
 	if err != nil {
-		return nil, fmt.Errorf("error sending slack message: %w", err)
+		return nil, fmt.Errorf("error sending discord message: %w", err)
 	}
 	return buildOut(alert.Type, true), nil
 }
@@ -163,16 +142,13 @@ func buildOut(atype string, alerted bool) *concourse.OutResponse {
 }
 
 func main() {
-	// The first argument is the path to the build's sources.
-	path := os.Args[1]
-
 	var input *concourse.OutRequest
 	err := json.NewDecoder(os.Stdin).Decode(&input)
 	if err != nil {
 		log.Fatalln(fmt.Errorf("error reading stdin: %w", err))
 	}
 
-	o, err := out(input, path)
+	o, err := out(input)
 	if err != nil {
 		log.Fatalln(err)
 	}

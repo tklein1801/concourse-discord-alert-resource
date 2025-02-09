@@ -84,7 +84,7 @@ func Send(url string, m *Message, maxRetryTime time.Duration) error {
 			defer r.Body.Close()
 
 			if r.StatusCode > 399 {
-				return fmt.Errorf("unexpected response status code: %d", r.StatusCode)
+				return fmt.Errorf("unexpected response status code: '%d'! Payload: %s", r.StatusCode, buf)
 			}
 			return nil
 		},

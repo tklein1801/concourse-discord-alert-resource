@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -169,7 +168,7 @@ func TestOut(t *testing.T) {
 				os.Setenv(k, v)
 			}
 
-			got, err := out(c.outRequest, "")
+			got, err := out(c.outRequest)
 			if err != nil && !c.err {
 				t.Fatalf("unexpected error from out:\n\t(ERR): %s", err)
 			} else if err == nil && c.err {
@@ -190,76 +189,16 @@ func TestBuildMessage(t *testing.T) {
 				Type:    "default",
 				Color:   0xffffff,
 				IconURL: "",
-				Message: "Testing",
+				Message: "Defaulted",
 			},
 			want: &discord.Message{
-				Content:  "content ",
-				Username: "Concourse",
+				Username: "Concourse CI",
 				Embeds: []discord.Embed{
 					{
-						Description: "Testing",
+						Title:       "Defaulted",
+						Description: "The execution of task 'test' in pipeline 'demo' ended with status 'default'.",
 						URL:         "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1",
 						Color:       0xffffff,
-						Image:       &discord.Image{URL: "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1"},
-						Fields: []discord.Field{
-							{
-								Name:   "Step",
-								Value:  "demo/test",
-								Inline: true,
-							},
-							{
-								Name:   "Build",
-								Value:  "1",
-								Inline: true,
-							},
-						},
-					},
-				},
-			},
-		},
-		"message file": {
-			alert: Alert{
-				Type:        "default",
-				Message:     "Testing",
-				MessageFile: "test_file",
-			},
-			want: &discord.Message{
-				Content:  "content ",
-				Username: "Concourse",
-				Embeds: []discord.Embed{
-					{
-						Description: "filecontents",
-						URL:         "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1",
-						Image:       &discord.Image{URL: "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1"},
-						Fields: []discord.Field{
-							{
-								Name:   "Step",
-								Value:  "demo/test",
-								Inline: true,
-							},
-							{
-								Name:   "Build",
-								Value:  "1",
-								Inline: true,
-							},
-						},
-					},
-				},
-			},
-		},
-		"message file failure": {
-			alert: Alert{
-				Type:        "default",
-				Message:     "Testing",
-				MessageFile: "missing file",
-			},
-			want: &discord.Message{
-				Content:  "content ",
-				Username: "Concourse",
-				Embeds: []discord.Embed{
-					{
-						Description: "Testing",
-						URL:         "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1",
 						Image:       &discord.Image{URL: "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1"},
 						Fields: []discord.Field{
 							{
@@ -290,16 +229,8 @@ func TestBuildMessage(t *testing.T) {
 
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
-			path := ""
-			if c.alert.MessageFile != "" {
-				path = t.TempDir()
 
-				if err := os.WriteFile(filepath.Join(path, "test_file"), []byte("filecontents"), 0666); err != nil {
-					t.Fatal(err)
-				}
-			}
-
-			got := buildMessage(c.alert, metadata, path)
+			got := buildMessage(c.alert, metadata)
 			if !cmp.Equal(got, c.want) {
 				t.Fatalf("unexpected discord.Message value from buildDiscordMessage:\n\t(GOT): %#v\n\t(WNT): %#v\n\t(DIFF): %v", got, c.want, cmp.Diff(got, c.want))
 			}
