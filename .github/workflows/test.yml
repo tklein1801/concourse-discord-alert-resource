@@ -1,12 +1,13 @@
-name: ci
+name: test
 
 on:
+  workflow_dispatch:
   pull_request:
   push:
-    branches:
+    branches-ignore:
       - main
-    tags:
-      - v*
+    tags-ignore:
+      - '**'
 
 jobs:
   test:
@@ -45,7 +46,7 @@ jobs:
           cache-from: type=gha
           load: true
           push: false
-          tags: concourse-slack-alert-resource:dev
+          tags: ghcr.io/tklein1801/concourse-discord-alert-resource:dev
       - run: >
           echo "{\"source\":{\"url\":\"${{ vars.DISCORD_WEBHOOK }}\"}}" | docker run -i
           -e "BUILD_TEAM_NAME=main"
