@@ -48,6 +48,7 @@ jobs:
           tags: ghcr.io/tklein1801/concourse-discord-alert-resource:dev
       - run: >
           echo "{\"source\":{\"url\":\"${{ vars.DISCORD_WEBHOOK }}\"}}" | docker run -i
+          -e "ATC_EXTERNAL_URL=https://ci.example.com"
           -e "BUILD_TEAM_NAME=main"
           -e "BUILD_PIPELINE_NAME=github-actions"
           -e "BUILD_JOB_NAME=test"
