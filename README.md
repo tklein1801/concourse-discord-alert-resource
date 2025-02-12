@@ -5,9 +5,9 @@
 > [!NOTE]  
 > This is a fork of [arbourd/concourse-slack-alert-resource](https://github.com/arbourd/concourse-slack-alert-resource) which got modified in order to send messages as notifications to Discord using webhooks
 
-A structured and opinionated Slack notification resource for [Concourse](https://concourse-ci.org/).
+A structured and opinionated Discord notification resource for [Concourse](https://concourse-ci.org/).
 
-<img src="./img/default.png" width="60%">
+<img src="./img/default.png" width="100%" style="border-radius: 5px">
 
 The message is built by using Concourse's [resource metadata](https://concourse-ci.org/implementing-resource-types.html#resource-metadata) to show the pipeline, job, build number and a URL.
 
@@ -28,7 +28,6 @@ See the [Concourse docs](https://concourse-ci.org/resource-types.html) for more 
 ## Source Configuration
 
 - `url`: _Required._ Slack webhook URL.
-- `channel`: _Optional_. Target channel where messages are posted. If unset the default channel of the webhook is used.
 - `concourse_url`: _Optional._ The external URL that points to Concourse. Defaults to the env variable `ATC_EXTERNAL_URL`.
 - `username`: _Optional._ Concourse local user (or basic auth) username. Required for non-public pipelines if using alert type `fixed` or `broke`
 - `password`: _Optional._ Concourse local user (or basic auth) password. Required for non-public pipelines if using alert type `fixed` or `broke`
@@ -47,8 +46,6 @@ Sends a structured message to Slack based on the alert type.
 #### Parameters
 
 - `alert_type`: _Optional._ The type of alert to send to Slack. See [Alert Types](#alert-types). Defaults to `default`.
-- `channel`: _Optional._ Channel where this message is posted. Defaults to the `channel` setting in Source.
-- `channel_file`: _Optional._ File containing text which overrides `channel`. If the file cannot be read, `channel` will be used instead.
 - `message`: _Optional._ The status message at the top of the alert. Defaults to name of alert type.
 - `message_file`: _Optional._ File containing text which overrides `message`. If the file cannot be read, `message` will be used instead.
 - `text`: _Optional._ Additional text below the message of the alert. Defaults to an empty string.
@@ -60,39 +57,39 @@ Sends a structured message to Slack based on the alert type.
 
 - `default`
 
-  <img src="./img/default.png" width="50%">
+  <img src="./img/default.png" width="100%" style="border-radius: 5px">
 
 - `success`
 
-  <img src="./img/success.png" width="50%">
+  <!-- <img src="./img/success.png" width="50%"> -->
 
 - `failed`
 
-  <img src="./img/failed.png" width="50%">
+  <!-- <img src="./img/failed.png" width="50%"> -->
 
 - `started`
 
-  <img src="./img/started.png" width="50%">
+  <!-- <img src="./img/started.png" width="50%"> -->
 
 - `aborted`
 
-  <img src="./img/aborted.png" width="50%">
+  <!-- <img src="./img/aborted.png" width="50%"> -->
 
 - `errored`
 
-  <img src="./img/errored.png" width="50%">
+  <!-- <img src="./img/errored.png" width="50%"> -->
 
 - `fixed`
 
   Fixed is a special alert type that only alerts if the previous build did not succeed. Fixed requires `username` and `password` to be set for the resource if the pipeline is not public.
 
-  <img src="./img/fixed.png" width="50%">
+  <!-- <img src="./img/fixed.png" width="50%"> -->
 
 - `broke`
 
   Broke is a special alert type that only alerts if the previous build succeed. Broke requires `username` and `password` to be set for the resource if the pipeline is not public.
 
-  <img src="./img/broke.png" width="50%">
+  <!-- <img src="./img/broke.png" width="50%"> -->
 
 ## Examples
 
@@ -105,7 +102,7 @@ resources:
   - name: notify
     type: discord-alert
     source:
-      url: https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+      url: https://discord.com/api/webhooks/********/****
 
 jobs:
   # ...
@@ -123,7 +120,7 @@ resources:
   - name: notify
     type: discord-alert
     source:
-      url: https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+      url: https://discord.com/api/webhooks/********/****
 
 jobs:
   # ...
@@ -157,7 +154,7 @@ resources:
   - name: notify
     type: discord-alert
     source:
-      url: https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+      url: https://discord.com/api/webhooks/********/****
       # `alert_type: fixed` requires Concourse credentials if pipeline is private
       username: concourse
       password: concourse
