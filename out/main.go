@@ -51,37 +51,26 @@ func buildMessage(alert Alert, m concourse.BuildMetadata, path string) *discord.
 
 	embeds := []discord.Embed{
 		{
-			Title:       message,
-			Description: fmt.Sprintf("The execution of task '%s' in pipeline '%s' ended with status '%s'.", m.JobName, m.PipelineName, alert.Type),
+			Title:       fmt.Sprintf("%s%s", message, text),
+			Description: fmt.Sprintf("The execution of task `%s` in pipeline `%s` ended with status `%s`.", m.JobName, m.PipelineName, alert.Type),
 			Color:       convColor,
+			URL:         m.URL,
 			Fields: []discord.Field{
 				{
 					Name:   "Step",
-					Value:  fmt.Sprintf("%s/%s", m.PipelineName, m.JobName),
+					Value:  fmt.Sprintf("`%s/%s`", m.PipelineName, m.JobName),
 					Inline: true,
 				},
 				{
 					Name:   "Build",
-					Value:  m.BuildName,
+					Value:  fmt.Sprintf("`%s`", m.BuildName),
 					Inline: true,
-				},
-				{
-					Name:  "Message",
-					Value: message,
-				},
-				{
-					Name:  "Text",
-					Value: text,
-				},
-				{
-					Name:  "URL",
-					Value: m.URL,
 				},
 			},
 		},
 	}
 
-	return &discord.Message{Username: "Concourse CI", AvatarURL: alert.IconURL, Embeds: embeds}
+	return &discord.Message{Username: "Concourse", AvatarURL: alert.IconURL, Embeds: embeds}
 }
 
 func previousBuildStatus(input *concourse.OutRequest, m concourse.BuildMetadata) (string, error) {

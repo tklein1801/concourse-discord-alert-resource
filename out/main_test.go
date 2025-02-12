@@ -191,33 +191,22 @@ func TestBuildMessage(t *testing.T) {
 				IconURL: "",
 				Message: "Testing",
 			},
-			want: &discord.Message{Username: "Concourse CI", AvatarURL: "", Embeds: []discord.Embed{
+			want: &discord.Message{Username: "Concourse", AvatarURL: "", Embeds: []discord.Embed{
 				{
 					Title:       "Testing",
-					Description: "The execution of task 'test' in pipeline 'demo' ended with status 'default'.",
+					Description: "The execution of task `test` in pipeline `demo` ended with status `default`.",
 					Color:       16777215,
+					URL:         "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1",
 					Fields: []discord.Field{
 						{
 							Name:   "Step",
-							Value:  "demo/test",
+							Value:  "`demo/test`",
 							Inline: true,
 						},
 						{
 							Name:   "Build",
-							Value:  "1",
+							Value:  "`1`",
 							Inline: true,
-						},
-						{
-							Name:  "Message",
-							Value: "Testing",
-						},
-						{
-							Name:  "Text",
-							Value: "",
-						},
-						{
-							Name:  "URL",
-							Value: "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1",
 						},
 					},
 				},
@@ -229,33 +218,22 @@ func TestBuildMessage(t *testing.T) {
 				Message:     "Testing",
 				MessageFile: "test_file",
 			},
-			want: &discord.Message{Username: "Concourse CI", AvatarURL: "", Embeds: []discord.Embed{
+			want: &discord.Message{Username: "Concourse", AvatarURL: "", Embeds: []discord.Embed{
 				{
 					Title:       "filecontents",
-					Description: "The execution of task 'test' in pipeline 'demo' ended with status 'default'.",
+					Description: "The execution of task `test` in pipeline `demo` ended with status `default`.",
 					Color:       3492188,
+					URL:         "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1",
 					Fields: []discord.Field{
 						{
 							Name:   "Step",
-							Value:  "demo/test",
+							Value:  "`demo/test`",
 							Inline: true,
 						},
 						{
 							Name:   "Build",
-							Value:  "1",
+							Value:  "`1`",
 							Inline: true,
-						},
-						{
-							Name:  "Message",
-							Value: "filecontents",
-						},
-						{
-							Name:  "Text",
-							Value: "",
-						},
-						{
-							Name:  "URL",
-							Value: "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1",
 						},
 					},
 				},
@@ -267,33 +245,22 @@ func TestBuildMessage(t *testing.T) {
 				Message:     "Testing",
 				MessageFile: "missing file",
 			},
-			want: &discord.Message{Username: "Concourse CI", AvatarURL: "", Embeds: []discord.Embed{
+			want: &discord.Message{Username: "Concourse", AvatarURL: "", Embeds: []discord.Embed{
 				{
 					Title:       "Testing",
-					Description: "The execution of task 'test' in pipeline 'demo' ended with status 'default'.",
+					Description: "The execution of task `test` in pipeline `demo` ended with status `default`.",
 					Color:       3492188,
+					URL:         "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1",
 					Fields: []discord.Field{
 						{
 							Name:   "Step",
-							Value:  "demo/test",
+							Value:  "`demo/test`",
 							Inline: true,
 						},
 						{
 							Name:   "Build",
-							Value:  "1",
+							Value:  "`1`",
 							Inline: true,
-						},
-						{
-							Name:  "Message",
-							Value: "Testing",
-						},
-						{
-							Name:  "Text",
-							Value: "",
-						},
-						{
-							Name:  "URL",
-							Value: "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1",
 						},
 					},
 				},
