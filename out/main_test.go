@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -57,7 +58,6 @@ func TestOut(t *testing.T) {
 				Version: concourse.Version{"ver": "static"},
 				Metadata: []concourse.Metadata{
 					{Name: "type", Value: "success"},
-
 					{Name: "alerted", Value: "true"},
 				},
 			},
@@ -72,7 +72,6 @@ func TestOut(t *testing.T) {
 				Version: concourse.Version{"ver": "static"},
 				Metadata: []concourse.Metadata{
 					{Name: "type", Value: "failed"},
-
 					{Name: "alerted", Value: "true"},
 				},
 			},
@@ -138,7 +137,7 @@ func TestOut(t *testing.T) {
 			},
 			env: env,
 		},
-		"error without Discord Webhook URL": {
+		"error without Discord URL": {
 			outRequest: &concourse.OutRequest{
 				Source: concourse.Source{URL: ""},
 			},
@@ -168,7 +167,7 @@ func TestOut(t *testing.T) {
 				os.Setenv(k, v)
 			}
 
-			got, err := out(c.outRequest)
+			got, err := out(c.outRequest, "")
 			if err != nil && !c.err {
 				t.Fatalf("unexpected error from out:\n\t(ERR): %s", err)
 			} else if err == nil && c.err {
@@ -179,6 +178,7 @@ func TestOut(t *testing.T) {
 		})
 	}
 }
+
 func TestBuildMessage(t *testing.T) {
 	cases := map[string]struct {
 		alert Alert
@@ -187,35 +187,117 @@ func TestBuildMessage(t *testing.T) {
 		"url set": {
 			alert: Alert{
 				Type:    "default",
-				Color:   0xffffff,
+				Color:   "#ffffff",
 				IconURL: "",
-				Message: "Defaulted",
+				Message: "Testing",
 			},
-			want: &discord.Message{
-				Username: "Concourse CI",
-				Embeds: []discord.Embed{
-					{
-						Title:       "Defaulted",
-						Description: "The execution of task 'test' in pipeline 'demo' ended with status 'default'.",
-						URL:         "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1",
-						Color:       0xffffff,
-						Image:       &discord.Image{URL: "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1"},
-						Fields: []discord.Field{
-							{
-								Name:   "Step",
-								Value:  "demo/test",
-								Inline: true,
-							},
-							{
-								Name:   "Build",
-								Value:  "1",
-								Inline: true,
-							},
+			want: &discord.Message{Username: "Concourse CI", AvatarURL: "", Embeds: []discord.Embed{
+				{
+					Title:       "Testing",
+					Description: "The execution of task 'test' in pipeline 'demo' ended with status 'default'.",
+					Color:       16777215,
+					Fields: []discord.Field{
+						{
+							Name:   "Step",
+							Value:  "demo/test",
+							Inline: true,
+						},
+						{
+							Name:   "Build",
+							Value:  "1",
+							Inline: true,
+						},
+						{
+							Name:  "Message",
+							Value: "Testing",
+						},
+						{
+							Name:  "Text",
+							Value: "",
+						},
+						{
+							Name:  "URL",
+							Value: "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1",
 						},
 					},
 				},
-			},
+			}},
 		},
+		"message file": {
+			alert: Alert{
+				Type:        "default",
+				Message:     "Testing",
+				MessageFile: "test_file",
+			},
+			want: &discord.Message{Username: "Concourse CI", AvatarURL: "", Embeds: []discord.Embed{
+				{
+					Title:       "filecontents",
+					Description: "The execution of task 'test' in pipeline 'demo' ended with status 'default'.",
+					Color:       3492188,
+					Fields: []discord.Field{
+						{
+							Name:   "Step",
+							Value:  "demo/test",
+							Inline: true,
+						},
+						{
+							Name:   "Build",
+							Value:  "1",
+							Inline: true,
+						},
+						{
+							Name:  "Message",
+							Value: "filecontents",
+						},
+						{
+							Name:  "Text",
+							Value: "",
+						},
+						{
+							Name:  "URL",
+							Value: "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1",
+						},
+					},
+				},
+			}},
+		},
+		"message file failure": {
+			alert: Alert{
+				Type:        "default",
+				Message:     "Testing",
+				MessageFile: "missing file",
+			},
+			want: &discord.Message{Username: "Concourse CI", AvatarURL: "", Embeds: []discord.Embed{
+				{
+					Title:       "Testing",
+					Description: "The execution of task 'test' in pipeline 'demo' ended with status 'default'.",
+					Color:       3492188,
+					Fields: []discord.Field{
+						{
+							Name:   "Step",
+							Value:  "demo/test",
+							Inline: true,
+						},
+						{
+							Name:   "Build",
+							Value:  "1",
+							Inline: true,
+						},
+						{
+							Name:  "Message",
+							Value: "Testing",
+						},
+						{
+							Name:  "Text",
+							Value: "",
+						},
+						{
+							Name:  "URL",
+							Value: "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1",
+						},
+					},
+				},
+			}}},
 	}
 
 	metadata := concourse.BuildMetadata{
@@ -229,8 +311,16 @@ func TestBuildMessage(t *testing.T) {
 
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
+			path := ""
+			if c.alert.MessageFile != "" {
+				path = t.TempDir()
 
-			got := buildMessage(c.alert, metadata)
+				if err := os.WriteFile(filepath.Join(path, "test_file"), []byte("filecontents"), 0666); err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			got := buildMessage(c.alert, metadata, path)
 			if !cmp.Equal(got, c.want) {
 				t.Fatalf("unexpected discord.Message value from buildDiscordMessage:\n\t(GOT): %#v\n\t(WNT): %#v\n\t(DIFF): %v", got, c.want, cmp.Diff(got, c.want))
 			}

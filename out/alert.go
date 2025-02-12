@@ -8,74 +8,94 @@ import (
 
 // An Alert defines the notification that will be sent to Slack.
 type Alert struct {
-	Type     string
-	Color    uint
-	IconURL  string
-	Message  string
-	Text     string
-	Disabled bool
+	Type        string
+	Color       string
+	IconURL     string
+	Message     string
+	MessageFile string
+	Text        string
+	TextFile    string
+	Disabled    bool
+}
+
+func (alert Alert) ColorToDecimal() (int, error) {
+	hex := alert.Color
+	if hex == "" {
+		hex = "#35495c"
+	}
+
+	if hex[0] == '#' {
+		hex = hex[1:]
+	}
+
+	// Parse the HEX color as an integer (base 16)
+	color, err := strconv.ParseInt(hex, 16, 32)
+	if err != nil {
+		return 0, err
+	}
+
+	return int(color), nil
 }
 
 // NewAlert constructs and returns an Alert.
 func NewAlert(input *concourse.OutRequest) Alert {
 	var alert Alert
-	defaultColor := uint(0x35495c) // Dark blue
 	switch input.Params.AlertType {
 	case "success":
 		alert = Alert{
 			Type:    "success",
-			Color:   0x32cd32, // Green
+			Color:   "#32cd32",
 			IconURL: "https://ci.concourse-ci.org/public/images/favicon-succeeded.png",
 			Message: "Success",
 		}
 	case "failed":
 		alert = Alert{
 			Type:    "failed",
-			Color:   0xd00000, // Red
+			Color:   "#d00000",
 			IconURL: "https://ci.concourse-ci.org/public/images/favicon-failed.png",
 			Message: "Failed",
 		}
 	case "started":
 		alert = Alert{
 			Type:    "started",
-			Color:   0xf7cd42, // Yellow
+			Color:   "#f7cd42",
 			IconURL: "https://ci.concourse-ci.org/public/images/favicon-started.png",
 			Message: "Started",
 		}
 	case "aborted":
 		alert = Alert{
 			Type:    "aborted",
-			Color:   0x8d4b32, // Brown
+			Color:   "#8d4b32",
 			IconURL: "https://ci.concourse-ci.org/public/images/favicon-aborted.png",
 			Message: "Aborted",
 		}
 	case "fixed":
 		alert = Alert{
 			Type:    "fixed",
-			Color:   0x32cd32, // Green
+			Color:   "#32cd32",
 			IconURL: "https://ci.concourse-ci.org/public/images/favicon-succeeded.png",
 			Message: "Fixed",
 		}
 	case "broke":
 		alert = Alert{
 			Type:    "broke",
-			Color:   0xd00000, // Red
+			Color:   "#d00000",
 			IconURL: "https://ci.concourse-ci.org/public/images/favicon-failed.png",
 			Message: "Broke",
 		}
 	case "errored":
 		alert = Alert{
 			Type:    "errored",
-			Color:   0xf5a623, // Orange
+			Color:   "#f5a623",
 			IconURL: "https://ci.concourse-ci.org/public/images/favicon-errored.png",
 			Message: "Errored",
 		}
 	default:
 		alert = Alert{
 			Type:    "default",
-			Color:   defaultColor, // Dark blue
+			Color:   "#35495c",
 			IconURL: "https://ci.concourse-ci.org/public/images/favicon-pending.png",
-			Message: "Defaulted",
+			Message: "",
 		}
 	}
 
@@ -87,18 +107,13 @@ func NewAlert(input *concourse.OutRequest) Alert {
 	if input.Params.Message != "" {
 		alert.Message = input.Params.Message
 	}
+	alert.MessageFile = input.Params.MessageFile
 
 	if input.Params.Color != "" {
-		colorValue, err := strconv.ParseUint(input.Params.Color, 16, 32)
-		if err == nil {
-			alert.Color = uint(colorValue)
-		} else {
-			alert.Color = defaultColor // Default color setting
-		}
-	} else {
-		alert.Color = defaultColor // Default color setting
+		alert.Color = input.Params.Color
 	}
 
 	alert.Text = input.Params.Text
+	alert.TextFile = input.Params.TextFile
 	return alert
 }
