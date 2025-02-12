@@ -6,7 +6,7 @@ import (
 	"github.com/tklein1801/concourse-discord-alert-resource/concourse"
 )
 
-// An Alert defines the notification that will be sent to Slack.
+// An Alert defines the notification that will be sent to Discord.
 type Alert struct {
 	Type        string
 	Color       string
