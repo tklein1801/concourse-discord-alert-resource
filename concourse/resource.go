@@ -37,6 +37,7 @@ type OutParams struct {
 	Text        string `json:"text"`
 	TextFile    string `json:"text_file"`
 	Disable     bool   `json:"disable"`
+	Role        string `json:"role"`
 }
 
 // OutRequest is in the input for the out operation.

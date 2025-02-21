@@ -70,7 +70,17 @@ func buildMessage(alert Alert, m concourse.BuildMetadata, path string) *discord.
 		},
 	}
 
-	return &discord.Message{Username: "Concourse", AvatarURL: alert.IconURL, Embeds: embeds}
+	msg := &discord.Message{
+		Username:  "Concourse",
+		AvatarURL: alert.IconURL,
+		Embeds:    embeds,
+	}
+
+	if alert.Role != "" {
+		msg.Content = fmt.Sprintf("<@&%s>", alert.Role)
+	}
+
+	return msg
 }
 
 func previousBuildStatus(input *concourse.OutRequest, m concourse.BuildMetadata) (string, error) {

@@ -212,6 +212,35 @@ func TestBuildMessage(t *testing.T) {
 				},
 			}},
 		},
+		"role set": {
+			alert: Alert{
+				Type:    "default",
+				Color:   "#ffffff",
+				IconURL: "",
+				Message: "Testing",
+				Role:    "1234567890",
+			},
+			want: &discord.Message{Username: "Concourse", AvatarURL: "", Content: "<@&1234567890>", Embeds: []discord.Embed{
+				{
+					Title:       "Testing",
+					Description: "The execution of task `test` in pipeline `demo` ended with status `default`.",
+					Color:       16777215,
+					URL:         "https://ci.example.com/teams/main/pipelines/demo/jobs/test/builds/1",
+					Fields: []discord.Field{
+						{
+							Name:   "Step",
+							Value:  "`demo/test`",
+							Inline: true,
+						},
+						{
+							Name:   "Build",
+							Value:  "`1`",
+							Inline: true,
+						},
+					},
+				},
+			}},
+		},
 		"message file": {
 			alert: Alert{
 				Type:        "default",

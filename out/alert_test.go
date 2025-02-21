@@ -20,9 +20,9 @@ func TestNewAlert(t *testing.T) {
 		"custom params": {
 			input: &concourse.OutRequest{
 				Source: concourse.Source{},
-				Params: concourse.OutParams{Color: "#ffffff", Message: "custom-message", Text: "custom-text", Disable: true},
+				Params: concourse.OutParams{Color: "#ffffff", Message: "custom-message", Text: "custom-text", Disable: true, Role: "1342563020215291936"},
 			},
-			want: Alert{Type: "default", Color: "#ffffff", IconURL: "https://ci.concourse-ci.org/public/images/favicon-pending.png", Message: "custom-message", Text: "custom-text", Disabled: true},
+			want: Alert{Type: "default", Color: "#ffffff", IconURL: "https://ci.concourse-ci.org/public/images/favicon-pending.png", Message: "custom-message", Text: "custom-text", Disabled: true, Role: "1342563020215291936"},
 		},
 		"custom source": {
 			input: &concourse.OutRequest{
@@ -30,7 +30,6 @@ func TestNewAlert(t *testing.T) {
 			},
 			want: Alert{Type: "default", Color: "#35495c", IconURL: "https://ci.concourse-ci.org/public/images/favicon-pending.png", Disabled: true},
 		},
-
 		// Alert types.
 		"success": {
 			input: &concourse.OutRequest{Params: concourse.OutParams{AlertType: "success"}},

@@ -16,6 +16,7 @@ type Alert struct {
 	Text        string
 	TextFile    string
 	Disabled    bool
+	Role        string
 }
 
 func (alert Alert) ColorToDecimal() (int, error) {
@@ -111,6 +112,10 @@ func NewAlert(input *concourse.OutRequest) Alert {
 
 	if input.Params.Color != "" {
 		alert.Color = input.Params.Color
+	}
+
+	if input.Params.Role != "" {
+		alert.Role = input.Params.Role
 	}
 
 	alert.Text = input.Params.Text
