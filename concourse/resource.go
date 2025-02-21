@@ -6,7 +6,6 @@ type Source struct {
 	Username     string `json:"username"`
 	Password     string `json:"password"`
 	ConcourseURL string `json:"concourse_url"`
-	Channel      string `json:"channel"`
 	Disable      bool   `json:"disable"`
 }
 
@@ -32,8 +31,6 @@ type InResponse struct {
 // OutParams are the parameters that can be configured for the out operation.
 type OutParams struct {
 	AlertType   string `json:"alert_type"`
-	Channel     string `json:"channel"`
-	ChannelFile string `json:"channel_file"`
 	Color       string `json:"color"`
 	Message     string `json:"message"`
 	MessageFile string `json:"message_file"`
